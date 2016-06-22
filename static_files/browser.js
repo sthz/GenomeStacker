@@ -191,6 +191,31 @@ function comparativeOnClick(m, poly,comp){
 };
 
 
+function makeGradientColor(color1, color2, percent) {
+    var newColor = {};
+    function makeChannel(a, b) {
+        return(a + Math.round((b-a)*(percent/100)));
+    };
+    function makeColorPiece(num) {
+        num = Math.min(num, 255);   // not more than 255
+        num = Math.max(num, 0);     // not less than 0
+        var str = num.toString(16);
+        if (str.length < 2) {
+            str = "0" + str;
+        }
+        return(str);
+    };
+    newColor.r = makeChannel(color1.r, color2.r);
+    newColor.g = makeChannel(color1.g, color2.g);
+    newColor.b = makeChannel(color1.b, color2.b);
+    newColor.cssColor = "#" + 
+                        makeColorPiece(newColor.r) + 
+                        makeColorPiece(newColor.g) + 
+                        makeColorPiece(newColor.b);
+    return(newColor.cssColor);
+}
+
+
 function drawComparative(cache,comp,top, bottom){
 	stage = new Konva.Stage({
 		container: comp.id,
@@ -232,12 +257,11 @@ function drawComparative(cache,comp,top, bottom){
 		} else {
 			colour = 'blue'
 		}
-		// Sets the color of the compare box to blue if the similarity is lower then 95,00%
-		// if (m.id <= 95) {
-		// 	colour = '#0900FF';
-		// } else {
-		// 	colour = '#FF0000';
-		// }
+		// Use colour gradient 0-100 based on % identity.
+		var colourgradient = 100-((100-m.id)*5)
+
+		colour = makeGradientColor({r:255, g:255, b:255}, {r:255, g:0, b:0}, colourgradient);
+
 
 		var points = [rx1, y1, qx1, y2, qx2, y2, rx2, y1];
 		//		  while (points[0]<0 ||points[0]>layerWidth) {
