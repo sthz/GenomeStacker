@@ -414,36 +414,42 @@ function generateFastaFile(){
 	var count = 0;
 	downloadfasta = "";
 	var mergedfasta = "";
+	var undefinedcount = 0;
 	for (var i = 0; i < dallianceBrowsers.length;i++){
-		if(dallianceBrowsers[i].highlights[0] != undefined){
-			dallianceBrowsers[i].getSequenceSource().fetch(dallianceBrowsers[i].highlights[0].chr.toString()
-			,dallianceBrowsers[i].highlights[0].min
-			,dallianceBrowsers[i].highlights[0].max
-			,null
-			,function(a,b){		
-				mergedfasta += ">"+b.name+"_"+b.start+"_"+b.end+"<br>"+b.seq.replace(/(.{60})/g, "$1<br>")+"<br>"
-				downloadfasta += ">"+b.name+"_"+b.start+"_"+b.end+"\n"+b.seq.replace(/(.{60})/g, "$1\n")+"\n"
-				count++
-				fastaname += (b.name+"_")
-				var controlbuttons = '<div><button class="btn btn-primary" onclick="download(\''+fastaname+'\',downloadfasta)" >download the '+count+' selected sequences as fasta</button></div><br>'
-				UnTip()
-				Tip("<font face='Courier'>"+controlbuttons+mergedfasta,
-					BGCOLOR, 'white',
-					TITLE, "Selected sequences",
-					FIX, [$(window).width()/2-275,$(window).scrollTop()+200],
-					STICKY,		true,
-					HEIGHT, 750,
-					WIDTH, 550,
-					CLOSEBTN,	true,
-					EXCLUSIVE,	true
-				);
-				
-			});
-		} else{
-			alert("No genes selected.")
-			break;
+		if(dallianceBrowsers[i].highlights[0] == undefined){
+			undefinedcount++
 		};
 	};
+	if(undefinedcount == dallianceBrowsers.length){
+		alert("No genes selected.")
+	} else {
+		for (var i = 0; i < dallianceBrowsers.length;i++){
+			if(dallianceBrowsers[i].highlights[0] != undefined){
+				dallianceBrowsers[i].getSequenceSource().fetch(dallianceBrowsers[i].highlights[0].chr.toString()
+				,dallianceBrowsers[i].highlights[0].min
+				,dallianceBrowsers[i].highlights[0].max
+				,null
+				,function(a,b){		
+					mergedfasta += ">"+b.name+"_"+b.start+"_"+b.end+"<br>"+b.seq.replace(/(.{60})/g, "$1<br>")+"<br>"
+					downloadfasta += ">"+b.name+"_"+b.start+"_"+b.end+"\n"+b.seq.replace(/(.{60})/g, "$1\n")+"\n"
+					count++
+					fastaname += (b.name+"_")
+					var controlbuttons = '<div><button class="btn btn-primary" onclick="download(\''+fastaname+'\',downloadfasta)" >download the '+count+' selected sequences as fasta</button></div><br>'
+					UnTip()
+					Tip("<font face='Courier'>"+controlbuttons+mergedfasta,
+						BGCOLOR, 'white',
+						TITLE, "Selected sequences",
+						FIX, [$(window).width()/2-275,$(window).scrollTop()+200],
+						STICKY,		true,
+						HEIGHT, 750,
+						WIDTH, 550,
+						CLOSEBTN,	true,
+						EXCLUSIVE,	true
+					);				
+				});
+			}
+		};
+	};	
 };
 
 
