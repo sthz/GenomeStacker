@@ -213,21 +213,9 @@ function drawComparative(cache,comp,top, bottom){
 			cachesplit.push(cache[i]);
 		};		
 		//If the comparative layer is in the first position it is manually added here.
-		// if ((cache[i].rstart == 1) || cache[i].qstart == 1){
-		// 	cachesplit.push(cache[i]);
-		// };
 		if ((cache[i].rstart) <= (top.viewStart) && (cache[i].rend) >= (top.viewEnd) ||
 			(cache[i].qstart) <= (bottom.viewStart) && (cache[i].qend) >= (bottom.viewEnd)){
 			cachesplit.push(cache[i]);
-		};
-	};
-	// If user is zoomed in and the edges of the layers reach out. This function will add one layer that should be visible.
-	if(cachesplit[0] == null){	
-		console.log("Debug")
-		for (var i=0; i < cache.length; i++){
-			if (((top.viewStart | 0) >=  cache[i].rstart) && ((top.viewEnd | 0) <=  cache[i].rend )){
-				cachesplit.push(cache[i]);
-			};
 		};
 	};
 	//Values in cachesplit will be presented onscreen.
