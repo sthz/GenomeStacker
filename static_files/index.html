@@ -1,0 +1,495 @@
+ 
+      <!DOCTYPE html>
+      <!-- Jquery -->
+      <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+      <!-- Optional theme -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+      <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+      <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+
+      <html>
+          <head>
+              <title>JJCT</title>
+          </head>
+        <body>
+          <div class="col-md-8 centered">
+            <hr>
+            <b> Settings </b>
+            <hr>
+            <button class="btn btn-primary" onclick="backToOverview()">Back to overview</button>
+            <button class="btn btn-primary" onclick="makeCSVG()">makeSVG</button>
+            <b>Lock browsers</b>
+            <input type="checkbox" data-toggle="toggle" id="toggleBrowserButton" checked>
+            <b>Snap to center</b>
+            <input type="checkbox" data-toggle="toggle" id="toggleAutoCenter" >
+             <b>Show tooltip</b>
+            <input type="checkbox" data-toggle="toggle" id="showTooltip" checked>
+            <input type="search" id="setKonvaLayerHeight" placeholder="Set layer heigth"></input>
+            <button class="btn btn-primary" onclick="setKonvaLayerHeight()">Set</button>
+            <button class="btn btn-primary" onclick="generateFastaFile()">display fasta file from selected sequences.</button>
+            <br>
+            <hr>
+            <b> History </b>
+             <button type="button" class="btn btn-default" aria-label="Left Align" onclick="historySave()">
+                <span class="glyphicon glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-default" aria-label="Left Align" onclick="historyBack()">
+                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-default" aria-label="Left Align" onclick="historyForward()">
+                <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+            </button>
+          </div>
+
+      <script language="javascript" src="dalliance-all.js"></script>
+      <script language="javascript" src="konva.min.js"></script>
+      <script language="javascript" src="wz_tooltip.js"></script>
+      <script language="javascript" src="datadumper.js"></script>
+      <script language="javascript" src="browser.js"></script>
+      <script language="javascript">
+    
+    var dallianceBrowser_1 = new Browser({
+        chr: 'CP009578',
+        viewStart: 1,
+        viewEnd: 40000,
+        cookieKey: 'Escherichia_coli_FAP1',
+        pageName: 'dallianceBrowser_1',
+        coordSystem: {
+            speciesName: 'Escherichia coli FAP1 genome.',
+            taxon: 511145,
+            auth: '',
+            version: ' '
+        },
+        disablePoweredBy: true,
+        noPersist: true,
+        toolbarBelow: false,
+        maxViewWidth: 5254632,
+        sources: [{
+            name: 'Genome',
+            twoBitURI: 'Escherichia_coli_FAP1.2bit',
+            tier_type: 'sequence',
+            provides_entrypoints: true,
+            pinned: false
+        }, {
+            name: 'Genes',
+            bwgURI: 'Escherichia_coli_FAP1.bb',
+            tier_type: 'features',
+            pinned: false,
+            provides_search: true,
+            trixURI: 'Escherichia_coli_FAP1.ix',
+            collapseSuperGroups: true,
+            subtierMax: 1000,
+            style: [{
+                type: "default",
+                zoom: "high",
+                style: {
+                    glyph: "ANCHORED_ARROW",
+                    PARALLEL: true,
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }, {
+                type: "default",
+                zoom: "medium",
+                style: {
+                    glyph: "ANCHORED_ARROW",
+                    PARALLEL: true,
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }, {
+                type: "translation",
+                zoom: "low",
+                style: {
+                    glyph: "BOX",
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }]
+        }, ]
+    });
+    dallianceBrowser_1.addFeatureListener(function(event, feature, hit, tier) {
+        featureListener(event, feature, hit, tier,dallianceBrowser_1)
+    });
+    dallianceBrowser_1.addViewListener(function() {
+      if (islistening){
+        islistening = false;
+        viewListener(dallianceBrowser_1,0)
+          islistening = true;
+      }
+    });
+    dallianceBrowser_1.addFeatureHoverListener(function(event, feature, hit, tier) {
+        mouseOver(event, feature, hit, tier);
+    });
+    dallianceBrowser_1.addFeatureNonHoverListener(mouseOut);
+    dallianceBrowser_1.disableDefaultFeaturePopup = true;
+  
+    var dallianceBrowser_2 = new Browser({
+        chr: 'CP002797',
+        viewStart: 1,
+        viewEnd: 40000,
+        cookieKey: 'Escherichia_coli_NA114',
+        pageName: 'dallianceBrowser_2',
+        coordSystem: {
+            speciesName: 'Escherichia coli NA114, complete genome.',
+            taxon: 511145,
+            auth: '',
+            version: ' '
+        },
+        disablePoweredBy: true,
+        noPersist: true,
+        toolbarBelow: false,
+        maxViewWidth: 4971461,
+        sources: [{
+            name: 'Genome',
+            twoBitURI: 'Escherichia_coli_NA114.2bit',
+            tier_type: 'sequence',
+            provides_entrypoints: true,
+            pinned: false
+        }, {
+            name: 'Genes',
+            bwgURI: 'Escherichia_coli_NA114.bb',
+            tier_type: 'features',
+            pinned: false,
+            provides_search: true,
+            trixURI: 'Escherichia_coli_NA114.ix',
+            collapseSuperGroups: true,
+            subtierMax: 1000,
+            style: [{
+                type: "default",
+                zoom: "high",
+                style: {
+                    glyph: "ANCHORED_ARROW",
+                    PARALLEL: true,
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }, {
+                type: "default",
+                zoom: "medium",
+                style: {
+                    glyph: "ANCHORED_ARROW",
+                    PARALLEL: true,
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }, {
+                type: "translation",
+                zoom: "low",
+                style: {
+                    glyph: "BOX",
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }]
+        }, ]
+    });
+    dallianceBrowser_2.addFeatureListener(function(event, feature, hit, tier) {
+        featureListener(event, feature, hit, tier,dallianceBrowser_2)
+    });
+    dallianceBrowser_2.addViewListener(function() {
+      if (islistening){
+        islistening = false;
+        viewListener(dallianceBrowser_2,1)
+          islistening = true;
+      }
+    });
+    dallianceBrowser_2.addFeatureHoverListener(function(event, feature, hit, tier) {
+        mouseOver(event, feature, hit, tier);
+    });
+    dallianceBrowser_2.addFeatureNonHoverListener(mouseOut);
+    dallianceBrowser_2.disableDefaultFeaturePopup = true;
+  dallianceBrowser_2.noZoomSlider = true;
+    var dallianceBrowser_3 = new Browser({
+        chr: 'CP002291',
+        viewStart: 1,
+        viewEnd: 40000,
+        cookieKey: 'Escherichia_coli_P12b',
+        pageName: 'dallianceBrowser_3',
+        coordSystem: {
+            speciesName: 'Escherichia coli P12b, complete genome.',
+            taxon: 511145,
+            auth: '',
+            version: ' '
+        },
+        disablePoweredBy: true,
+        noPersist: true,
+        toolbarBelow: false,
+        maxViewWidth: 4935294,
+        sources: [{
+            name: 'Genome',
+            twoBitURI: 'Escherichia_coli_P12b.2bit',
+            tier_type: 'sequence',
+            provides_entrypoints: true,
+            pinned: false
+        }, {
+            name: 'Genes',
+            bwgURI: 'Escherichia_coli_P12b.bb',
+            tier_type: 'features',
+            pinned: false,
+            provides_search: true,
+            trixURI: 'Escherichia_coli_P12b.ix',
+            collapseSuperGroups: true,
+            subtierMax: 1000,
+            style: [{
+                type: "default",
+                zoom: "high",
+                style: {
+                    glyph: "ANCHORED_ARROW",
+                    PARALLEL: true,
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }, {
+                type: "default",
+                zoom: "medium",
+                style: {
+                    glyph: "ANCHORED_ARROW",
+                    PARALLEL: true,
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }, {
+                type: "translation",
+                zoom: "low",
+                style: {
+                    glyph: "BOX",
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }]
+        }, ]
+    });
+    dallianceBrowser_3.addFeatureListener(function(event, feature, hit, tier) {
+        featureListener(event, feature, hit, tier,dallianceBrowser_3)
+    });
+    dallianceBrowser_3.addViewListener(function() {
+      if (islistening){
+        islistening = false;
+        viewListener(dallianceBrowser_3,2)
+          islistening = true;
+      }
+    });
+    dallianceBrowser_3.addFeatureHoverListener(function(event, feature, hit, tier) {
+        mouseOver(event, feature, hit, tier);
+    });
+    dallianceBrowser_3.addFeatureNonHoverListener(mouseOut);
+    dallianceBrowser_3.disableDefaultFeaturePopup = true;
+  dallianceBrowser_3.noZoomSlider = true;
+    var dallianceBrowser_4 = new Browser({
+        chr: 'U00096',
+        viewStart: 1,
+        viewEnd: 40000,
+        cookieKey: 'K12_MG1655',
+        pageName: 'dallianceBrowser_4',
+        coordSystem: {
+            speciesName: 'Actcompare concatenated contigs',
+            taxon: 511145,
+            auth: '',
+            version: ' '
+        },
+        disablePoweredBy: true,
+        noPersist: true,
+        toolbarBelow: false,
+        maxViewWidth: 4641652,
+        sources: [{
+            name: 'Genome',
+            twoBitURI: 'K12_MG1655.2bit',
+            tier_type: 'sequence',
+            provides_entrypoints: true,
+            pinned: false
+        }, {
+            name: 'Genes',
+            bwgURI: 'K12_MG1655.bb',
+            tier_type: 'features',
+            pinned: false,
+            provides_search: true,
+            trixURI: 'K12_MG1655.ix',
+            collapseSuperGroups: true,
+            subtierMax: 1000,
+            style: [{
+                type: "default",
+                zoom: "high",
+                style: {
+                    glyph: "ANCHORED_ARROW",
+                    PARALLEL: true,
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }, {
+                type: "default",
+                zoom: "medium",
+                style: {
+                    glyph: "ANCHORED_ARROW",
+                    PARALLEL: true,
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }, {
+                type: "translation",
+                zoom: "low",
+                style: {
+                    glyph: "BOX",
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }]
+        }, ]
+    });
+    dallianceBrowser_4.addFeatureListener(function(event, feature, hit, tier) {
+        featureListener(event, feature, hit, tier,dallianceBrowser_4)
+    });
+    dallianceBrowser_4.addViewListener(function() {
+      if (islistening){
+        islistening = false;
+        viewListener(dallianceBrowser_4,3)
+          islistening = true;
+      }
+    });
+    dallianceBrowser_4.addFeatureHoverListener(function(event, feature, hit, tier) {
+        mouseOver(event, feature, hit, tier);
+    });
+    dallianceBrowser_4.addFeatureNonHoverListener(mouseOut);
+    dallianceBrowser_4.disableDefaultFeaturePopup = true;
+  dallianceBrowser_4.noZoomSlider = true;
+    var dallianceBrowser_5 = new Browser({
+        chr: 'U00096',
+        viewStart: 1,
+        viewEnd: 40000,
+        cookieKey: 'O157H7_Sakai',
+        pageName: 'dallianceBrowser_5',
+        coordSystem: {
+            speciesName: 'Actcompare concatenated contigs',
+            taxon: 511145,
+            auth: '',
+            version: ' '
+        },
+        disablePoweredBy: true,
+        noPersist: true,
+        toolbarBelow: false,
+        maxViewWidth: 5594477,
+        sources: [{
+            name: 'Genome',
+            twoBitURI: 'O157H7_Sakai.2bit',
+            tier_type: 'sequence',
+            provides_entrypoints: true,
+            pinned: false
+        }, {
+            name: 'Genes',
+            bwgURI: 'O157H7_Sakai.bb',
+            tier_type: 'features',
+            pinned: false,
+            provides_search: true,
+            trixURI: 'O157H7_Sakai.ix',
+            collapseSuperGroups: true,
+            subtierMax: 1000,
+            style: [{
+                type: "default",
+                zoom: "high",
+                style: {
+                    glyph: "ANCHORED_ARROW",
+                    PARALLEL: true,
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }, {
+                type: "default",
+                zoom: "medium",
+                style: {
+                    glyph: "ANCHORED_ARROW",
+                    PARALLEL: true,
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }, {
+                type: "translation",
+                zoom: "low",
+                style: {
+                    glyph: "BOX",
+                    BUMP: false,
+                    LABEL: false,
+                    HEIGHT: 20,
+                    BGITEM: true
+                }
+            }]
+        }, ]
+    });
+    dallianceBrowser_5.addFeatureListener(function(event, feature, hit, tier) {
+        featureListener(event, feature, hit, tier,dallianceBrowser_5)
+    });
+    dallianceBrowser_5.addViewListener(function() {
+      if (islistening){
+        islistening = false;
+        viewListener(dallianceBrowser_5,4)
+          islistening = true;
+      }
+    });
+    dallianceBrowser_5.addFeatureHoverListener(function(event, feature, hit, tier) {
+        mouseOver(event, feature, hit, tier);
+    });
+    dallianceBrowser_5.addFeatureNonHoverListener(mouseOut);
+    dallianceBrowser_5.disableDefaultFeaturePopup = true;
+  dallianceBrowser_5.noZoomSlider = true;
+    var cache = []
+    var islistening = true;
+var dallianceBrowsers = [dallianceBrowser_1,dallianceBrowser_2,dallianceBrowser_3,dallianceBrowser_4,dallianceBrowser_5]
+var jsonfiles = ['Escherichia_coli_FAP1_Escherichia_coli_NA114.json','Escherichia_coli_NA114_Escherichia_coli_P12b.json','Escherichia_coli_P12b_K12_MG1655.json','K12_MG1655_O157H7_Sakai.json']
+var comparisons = ["comparison_1_2","comparison_2_3","comparison_3_4","comparison_4_5"]
+var dallianceBrowserPositions = [[(dallianceBrowser_1.viewStart | 0), (dallianceBrowser_1.viewEnd | 0)],[(dallianceBrowser_2.viewStart | 0), (dallianceBrowser_2.viewEnd | 0)],[(dallianceBrowser_3.viewStart | 0), (dallianceBrowser_3.viewEnd | 0)],[(dallianceBrowser_4.viewStart | 0), (dallianceBrowser_4.viewEnd | 0)],[(dallianceBrowser_5.viewStart | 0), (dallianceBrowser_5.viewEnd | 0)]]
+    </script>
+  <div class='col-lg-12'>
+<div id='dallianceBrowser_1'>Dalliance here...</div>
+<div id='comparison_1_2' width=100% height='100'></div>
+<div id='dallianceBrowser_2'>Dalliance here...</div>
+<div id='comparison_2_3' width=100% height='100'></div>
+<div id='dallianceBrowser_3'>Dalliance here...</div>
+<div id='comparison_3_4' width=100% height='100'></div>
+<div id='dallianceBrowser_4'>Dalliance here...</div>
+<div id='comparison_4_5' width=100% height='100'></div>
+<div id='dallianceBrowser_5'>Dalliance here...</div>
+</div>
+      <script language="javascript">
+        refreshBrowser()
+        loadPageFromURL()
+      </script>
+      
+
+</body>
+
+
+</html>
+    

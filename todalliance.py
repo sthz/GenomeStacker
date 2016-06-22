@@ -30,10 +30,10 @@ def main():
   
   #--Generating files for dalliance browser.
 
-  #generateDallianceFiles(genbankfiles,path)  
-  #m8toJSON(m8files,path)
+  generateDallianceFiles(genbankfiles,path)  
+  m8toJSON(m8files,path)
   generateIndex(path,genbankfiles,m8files)
-  #getStaticFiles(path)
+  getStaticFiles(path)
 
   print("----------------------")
   print("Dalliance build succesfull!")
@@ -218,8 +218,10 @@ def staticIndexInfo(argument,files):
         <body>
           <div class="col-md-8 centered">
             <hr>
-            <button class="btn btn-primary" onclick="console.log(   cache    )">debug button</button>
+            <b> Settings </b>
+            <hr>
             <button class="btn btn-primary" onclick="backToOverview()">Back to overview</button>
+            <button class="btn btn-primary" onclick="makeCSVG()">makeSVG</button>
             <b>Lock browsers</b>
             <input type="checkbox" data-toggle="toggle" id="toggleBrowserButton" checked>
             <b>Snap to center</b>
@@ -229,7 +231,18 @@ def staticIndexInfo(argument,files):
             <input type="search" id="setKonvaLayerHeight" placeholder="Set layer heigth"></input>
             <button class="btn btn-primary" onclick="setKonvaLayerHeight()">Set</button>
             <button class="btn btn-primary" onclick="generateFastaFile()">display fasta file from selected sequences.</button>
+            <br>
             <hr>
+            <b> History </b>
+             <button type="button" class="btn btn-default" aria-label="Left Align" onclick="historySave()">
+                <span class="glyphicon glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-default" aria-label="Left Align" onclick="historyBack()">
+                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-default" aria-label="Left Align" onclick="historyForward()">
+                <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+            </button>
           </div>
 
       <script language="javascript" src="dalliance-all.js"></script>

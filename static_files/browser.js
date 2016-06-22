@@ -1,16 +1,130 @@
 // 
 // Comparative genome browser
 // Jurriaan Jansen 2016-
-//
+// 
+// This program needs the 'jquery-2.1.3.min.js' in order to work. 
  
 // #### variables 
 
 
 var changingLocation = false;
 var konvaLayerHeight = 120;
+var historyBrowser =  new Array();
+var fistoryBrowser =  new Array();
 
 
 // #### Functions
+
+
+function makeCSVG(){
+	blobURL = URL.createObjectURL(dallianceBrowsers[0].makeSVG({highlights: true,
+		ruler: true ? dallianceBrowsers[0].rulerLocation : 'none'}));
+	console.log(blobURL)
+};
+
+function getURLParameters(){
+	var urlParams = [];
+	var query  = window.location.search.substring(1);
+	var urlINFO = query.split("&")
+	for (var i = 1;i  < urlINFO.length;i++){ 
+		urlParams.push(parseInt(urlINFO[i].split("=")[1]));
+	};
+	return (urlParams);
+};
+
+
+function loadPageFromURL(){
+	urlParams = getURLParameters();
+	var j = 0;
+	console.log(urlParams);
+	if (urlParams.length != 0){
+		for (var i = 0;i  < dallianceBrowsers.length;i++){
+			changingLocation = true;
+			dallianceBrowsers[i].viewStart = parseInt(urlParams[j])
+			dallianceBrowsers[i].viewEnd = parseInt(urlParams[j+1])
+	 		dallianceBrowserPositions[i] = [parseInt(urlParams[j]),parseInt(urlParams[j+1])];
+	 		j+=2
+	 		changingLocation = false;
+		};
+	};
+};
+
+
+function arraysEqual(arr1, arr2) {
+    if(arr1.length !== arr2.length)
+        return false;
+    for(var i = arr1.length; i--;) {
+        if(arr1[i] !== arr2[i])
+            return false;
+    };
+    return true;
+};
+
+
+function historySave(){
+	fistoryBrowser = [];
+	var urlBuild = "?";
+	for (var i = 0;i  < dallianceBrowsers.length;i++){
+		urlBuild += ("&b"+[i+1]+"s="+(dallianceBrowsers[i].viewStart | 0))
+		urlBuild += ("&b"+[i+1]+"e="+(dallianceBrowsers[i].viewEnd | 0))
+	};
+	window.history.pushState('page', 'jjct', urlBuild);
+	var temp = [];
+	for (var i = 0;i  < dallianceBrowserPositions.length;i++){
+		temp.push(dallianceBrowserPositions[i]);
+	};
+	historyBrowser.push(temp);
+};
+
+
+function historyBack(){	
+	if (historyBrowser.length === 0){
+		alert("No more history in this session.");
+	} else {
+		var url = getURLParameters();		
+		var temp = []
+		for (var i = 0;i  < dallianceBrowserPositions.length;i++){
+			temp.push(dallianceBrowserPositions[i][0])
+			temp.push(dallianceBrowserPositions[i][1])
+		}
+		if (arraysEqual(temp,url)){
+			window.history.back();		
+			fistoryBrowser.push(historyBrowser.pop())
+		};
+		var position = historyBrowser[historyBrowser.length - 1];
+		for (var i = 0;i  < dallianceBrowsers.length;i++){
+			changingLocation = true;
+			dallianceBrowsers[i].setLocation(
+				dallianceBrowsers[i].chr,
+				position[i][0],
+				position[i][1]
+			);
+			dallianceBrowserPositions[i] = [position[i][0], position[i][1]];
+			changingLocation = false;
+		};
+	};
+};
+
+
+function historyForward(){
+	if (fistoryBrowser.length === 0){
+		alert("No forward history available.");
+	} else {
+		position = fistoryBrowser[fistoryBrowser.length - 1];
+		for (var i = 0;i  < dallianceBrowsers.length;i++){
+			changingLocation = true;
+			dallianceBrowsers[i].setLocation(
+				dallianceBrowsers[i].chr,
+				position[i][0],
+				position[i][1]
+			);
+			dallianceBrowserPositions[i] = [position[i][0], position[i][1]];
+			changingLocation = false;
+		};
+		historyBrowser.push(fistoryBrowser.pop())
+		window.history.forward();
+	};
+};
 
 
 function backToOverview(){
@@ -157,12 +271,16 @@ function drawComparative(cache,comp,top, bottom){
 		});
 		poly.on('mouseover', function() {
 			document.body.style.cursor = 'pointer';
-			Tip([top.coordSystem.speciesName 
-				+ "(" + top.chr + ") positions " + m.rstart + "-" + m.rend 
-				+ " matches " + bottom.coordSystem.speciesName 
-				+ "(" + bottom.chr + ") positions " + m.qstart + "-" 
-				+ m.qend + " [" + m.id 
-				+ '% identity]'].join('<br>'), DELAY, 0, FADEOUT, 0, WIDTH, -300)
+			UnTip()
+			Tip("<font face='Verdana' size='2'>"
+				+ "<b>" + m.id + '%</b> identity'
+				+ "<br>" + m.rstart +" "+ m.rend
+				+ "<br>" + m.qstart +" "+ m.qend
+				, 
+				DELAY, 0, 
+				FADEOUT, 0, 
+				WIDTH, -300
+			)
 		});
 		poly.on('mouseout', function() {
 			document.body.style.cursor = 'default';
@@ -175,7 +293,15 @@ function drawComparative(cache,comp,top, bottom){
 };
 
 
-
+function download(filename,text) {
+	var element = document.createElement('a');
+	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	element.setAttribute('download', filename);
+	element.style.display = 'none';
+	document.body.appendChild(element);
+	element.click();
+	document.body.removeChild(element);
+};
 
 
 function drawHoverDiv(b,event, feature, hit, tier){
@@ -253,12 +379,14 @@ function drawHoverDiv(b,event, feature, hit, tier){
 		"</div>"+
 	"</div>";
 	if(document.getElementById("showTooltip").checked){
+		console.log();
+		UnTip();
 		Tip(infoTable,
 			TITLE, feature.segment+" :"+feature.description,
 			BGCOLOR, 'white',
 			//[event.clientX,
 			//event.clientY],
-			FIX, [$(window).width()/2-275,200],
+			FIX, [$(window).width()/2-275,$(window).scrollTop()+200],
 			STICKY,	true,
 			HEIGHT, 750,
 			WIDTH, 550,
@@ -282,41 +410,41 @@ function featureListener(event, feature, hit, tier,browser){
 
 
 function generateFastaFile(){
-	var controlbuttons = 
-	'<div><button class="btn btn-primary" type="submit">Clutal alignment [development]</button></div><br>'+
-	'<div><button class="btn btn-primary" type="submit">Muscle alignment [development]</button></div><br>'  
+	var fastaname = "";
 	var count = 0;
+	downloadfasta = "";
 	var mergedfasta = "";
 	for (var i = 0; i < dallianceBrowsers.length;i++){
-		count++
 		if(dallianceBrowsers[i].highlights[0] != undefined){
 			dallianceBrowsers[i].getSequenceSource().fetch(dallianceBrowsers[i].highlights[0].chr.toString()
-				,dallianceBrowsers[i].highlights[0].min
-				,dallianceBrowsers[i].highlights[0].max
-				,null
-				,function(a,b){				
+			,dallianceBrowsers[i].highlights[0].min
+			,dallianceBrowsers[i].highlights[0].max
+			,null
+			,function(a,b){		
 				mergedfasta += ">"+b.name+"_"+b.start+"_"+b.end+"<br>"+b.seq.replace(/(.{60})/g, "$1<br>")+"<br>"
-				if (count == i){
-					Tip("<font face='Courier'>"+controlbuttons+mergedfasta,
-						BGCOLOR, 'white',
-						TITLE, "Selected sequences",
-						FIX, [$(window).width()/2-275,200],
-						STICKY,		true,
-						HEIGHT, 750,
-						WIDTH, 550,
-						CLOSEBTN,	true,
-						EXCLUSIVE,	true
-					);
-				};
+				downloadfasta += ">"+b.name+"_"+b.start+"_"+b.end+"\n"+b.seq.replace(/(.{60})/g, "$1\n")+"\n"
+				count++
+				fastaname += (b.name+"_")
+				var controlbuttons = '<div><button class="btn btn-primary" onclick="download(\''+fastaname+'\',downloadfasta)" >download the '+count+' selected sequences as fasta</button></div><br>'
+				UnTip()
+				Tip("<font face='Courier'>"+controlbuttons+mergedfasta,
+					BGCOLOR, 'white',
+					TITLE, "Selected sequences",
+					FIX, [$(window).width()/2-275,$(window).scrollTop()+200],
+					STICKY,		true,
+					HEIGHT, 750,
+					WIDTH, 550,
+					CLOSEBTN,	true,
+					EXCLUSIVE,	true
+				);
+				
 			});
-		}
+		} else{
+			alert("No genes selected.")
+			break;
+		};
 	};
 };
-
-
-function print(){
-	console.log(mergedfasta);
-}
 
 
 function getGCPercentage(sequence){
@@ -371,9 +499,14 @@ function mouseOver(event,feature,hit,tier) {
 
 
 	//thisB.featurePopup(event,feature,hit,tier)
-	Tip(feature.name2 + ' (' + feature.segment + 
-	':' + feature.min + '-' + feature.max + ')<br>' + feature.description,
-	DELAY, 0, FADEOUT, 0, WIDTH, -300)
+	UnTip()
+	Tip("<b>"+feature.name2 + "</b>"+ '<br>' +
+			(((feature.max)-(feature.min))+1) + ' bp<br>' +
+			feature.description,
+		DELAY, 0, 
+		FADEOUT, 0, 
+		WIDTH, -300
+	)
 };
 
 
@@ -403,8 +536,12 @@ function refreshComparative(comp, top, bottom) {
 
 
 function setKonvaLayerHeight(){
-    konvaLayerHeight = document.getElementById('setKonvaLayerHeight').value;
-    refreshBrowser()
+	if (isNaN(document.getElementById('setKonvaLayerHeight').value)) {
+		alert("'"+(document.getElementById('setKonvaLayerHeight').value)+"' is not a number.");
+	} else {
+		konvaLayerHeight = document.getElementById('setKonvaLayerHeight').value;
+		refreshBrowser()
+	};
 };
 
 
