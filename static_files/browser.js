@@ -38,7 +38,7 @@ function backToOverview(){
  		);
  		dallianceBrowserPositions[i] = [(dallianceBrowsers[i].viewStart | 0), (dallianceBrowsers[i].viewEnd | 0)];
  		changingLocation = false;
-	}
+	};
 };
 
 
@@ -92,11 +92,22 @@ function comparativeOnClick(m, poly,comp){
 };
 
 
+function download(filename,text) {
+	var element = document.createElement('a');
+	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	element.setAttribute('download', filename);
+	element.style.display = 'none';
+	document.body.appendChild(element);
+	element.click();
+	document.body.removeChild(element);
+};
+
+
 function drawComparative(cache,comp,top, bottom){
 	stage = new Konva.Stage({
 		container: comp.id,
-		// The -66 is there so the konva layer doesnt exceed the dalliance browser limit.
-		width: window.innerWidth-66,
+		// The -33 is there so the konva layer doesnt exceed the dalliance browser limit.
+		width: window.innerWidth-48,
 		height: konvaLayerHeight,
 	});
 	var layer = new Konva.Layer();
@@ -182,17 +193,6 @@ function drawComparative(cache,comp,top, bottom){
 		layer.add(poly);
 	});
 	stage.add(layer);
-};
-
-
-function download(filename,text) {
-	var element = document.createElement('a');
-	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-	element.setAttribute('download', filename);
-	element.style.display = 'none';
-	document.body.appendChild(element);
-	element.click();
-	document.body.removeChild(element);
 };
 
 
@@ -535,13 +535,23 @@ function refreshBrowser(){
 
 
 function setDesiredChangeRange(){
+	var old = document.getElementById('setDesiredChangeRange').value;
 	if (isNaN(document.getElementById('setDesiredChangeRange').value)) {
 		alert("'"+(document.getElementById('setDesiredChangeRange').value)+"' is not a number.");
 	} else {
-		desiredChangeRange = document.getElementById('setDesiredChangeRange').value;
-		refreshBrowser()
+		var i = document.getElementById('setDesiredChangeRange').value
+		if (i >= 100000 && i < 1000000){
+			if (confirm('This will make the browser very slow, are you sure you want this ?')) {
+				desiredChangeRange = i;
+			} else {
+				desiredChangeRange = old;
+			};
+		} else{		
+			desiredChangeRange = i;	
+		};	
 	};
-}
+	refreshBrowser()
+};
 
 
 function refreshComparative(comp, top, bottom) {
