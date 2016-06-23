@@ -29,10 +29,10 @@ def main():
   
   #--Generating files for dalliance browser.
 
-  generateDallianceFiles(genbankfiles,path)  
-  m8toJSON(m8files,path)
+  #generateDallianceFiles(genbankfiles,path)  
+  #m8toJSON(m8files,path)
   generateIndex(path,genbankfiles,m8files)
-  getStaticFiles(path)
+  #getStaticFiles(path)
 
   print("----------------------")
   print("Dalliance build succesfull!")
@@ -91,10 +91,10 @@ def generateArrays(genbankfilecount,m8files):
     comparisons.append("\"comparison_"+str(c+1)+"_"+str(c+2)+"\"")
     c += 1
   return("""
-    var cache = []
+    var cache = [[]]
     var islistening = true;"""+"\n"+
     "var dallianceBrowsers = ["+",".join(dallianceBrowsers)+"]"+"\n"+
-    "var jsonfiles = ["+",".join(jsonfiles)+"]"+"\n"+
+    "var jsonfiles = [["+",".join(jsonfiles)+"]]"+"\n"+
     "var comparisons = ["+",".join(comparisons)+"]"+"\n"+
     "var dallianceBrowserPositions = ["+",".join(dallianceBrowserPositions)+"]"+"""
     </script>
@@ -223,8 +223,6 @@ def staticIndexInfo(argument,files):
             <button class="btn btn-primary" onclick="makeCSVG()">makeSVG</button>
             <b>Lock browsers</b>
             <input type="checkbox" data-toggle="toggle" id="toggleBrowserButton" checked>
-            <b>Snap to center</b>
-            <input type="checkbox" data-toggle="toggle" id="toggleAutoCenter" >
              <b>Show tooltip</b>
             <input type="checkbox" data-toggle="toggle" id="showTooltip" checked>
             <input type="search" id="setKonvaLayerHeight" placeholder="Set layer heigth"></input>
@@ -257,6 +255,7 @@ def staticIndexInfo(argument,files):
     return("""
       <script language="javascript">
         refreshBrowser()
+        loadPageFromURL()
       </script>
 
       </body>

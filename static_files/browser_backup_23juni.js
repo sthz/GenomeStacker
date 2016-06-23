@@ -1,23 +1,53 @@
-// Name:       browser.js
-// Version:    0.2 (Development)
-// First commmit: 	5 march 2016
-// Last commit:  	23 june -2016
-// Desc: 	THis browser works with dalliance-all.js and wz_tooltip.js Comparative genome browser
+// 
+// Comparative genome browser
 // Jurriaan Jansen 2016-
 // 
 // This program needs the 'jquery-2.1.3.min.js' in order to work. 
  
 // #### variables 
 
+
 var changingLocation = false;
 var konvaLayerHeight = 120;
-var desiredChangeRange = 10000;
 var historyBrowser =  new Array();
 var fistoryBrowser =  new Array();
-var lastKonvaClick;
 
 
 // #### Functions
+
+
+function makeCSVG(){
+	blobURL = URL.createObjectURL(dallianceBrowsers[0].makeSVG({highlights: true,
+		ruler: true ? dallianceBrowsers[0].rulerLocation : 'none'}));
+	console.log(blobURL)
+};
+
+function getURLParameters(){
+	var urlParams = [];
+	var query  = window.location.search.substring(1);
+	var urlINFO = query.split("&")
+	for (var i = 1;i  < urlINFO.length;i++){ 
+		urlParams.push(parseInt(urlINFO[i].split("=")[1]));
+	};
+	return (urlParams);
+};
+
+
+function loadPageFromURL(){
+	urlParams = getURLParameters();
+	var j = 0;
+	console.log(urlParams);
+	if (urlParams.length != 0){
+		for (var i = 0;i  < dallianceBrowsers.length;i++){
+			changingLocation = true;
+			dallianceBrowsers[i].viewStart = parseInt(urlParams[j])
+			dallianceBrowsers[i].viewEnd = parseInt(urlParams[j+1])
+	 		dallianceBrowserPositions[i] = [parseInt(urlParams[j]),parseInt(urlParams[j+1])];
+	 		j+=2
+	 		changingLocation = false;
+		};
+	};
+};
 
 
 function arraysEqual(arr1, arr2) {
@@ -31,6 +61,72 @@ function arraysEqual(arr1, arr2) {
 };
 
 
+function historySave(){
+	fistoryBrowser = [];
+	var urlBuild = "?";
+	for (var i = 0;i  < dallianceBrowsers.length;i++){
+		urlBuild += ("&b"+[i+1]+"s="+(dallianceBrowsers[i].viewStart | 0))
+		urlBuild += ("&b"+[i+1]+"e="+(dallianceBrowsers[i].viewEnd | 0))
+	};
+	window.history.pushState('page', 'jjct', urlBuild);
+	var temp = [];
+	for (var i = 0;i  < dallianceBrowserPositions.length;i++){
+		temp.push(dallianceBrowserPositions[i]);
+	};
+	historyBrowser.push(temp);
+};
+
+
+function historyBack(){	
+	if (historyBrowser.length === 0){
+		alert("No more history in this session.");
+	} else {
+		var url = getURLParameters();		
+		var temp = []
+		for (var i = 0;i  < dallianceBrowserPositions.length;i++){
+			temp.push(dallianceBrowserPositions[i][0])
+			temp.push(dallianceBrowserPositions[i][1])
+		}
+		if (arraysEqual(temp,url)){
+			window.history.back();		
+			fistoryBrowser.push(historyBrowser.pop())
+		};
+		var position = historyBrowser[historyBrowser.length - 1];
+		for (var i = 0;i  < dallianceBrowsers.length;i++){
+			changingLocation = true;
+			dallianceBrowsers[i].setLocation(
+				dallianceBrowsers[i].chr,
+				position[i][0],
+				position[i][1]
+			);
+			dallianceBrowserPositions[i] = [position[i][0], position[i][1]];
+			changingLocation = false;
+		};
+	};
+};
+
+
+function historyForward(){
+	if (fistoryBrowser.length === 0){
+		alert("No forward history available.");
+	} else {
+		position = fistoryBrowser[fistoryBrowser.length - 1];
+		for (var i = 0;i  < dallianceBrowsers.length;i++){
+			changingLocation = true;
+			dallianceBrowsers[i].setLocation(
+				dallianceBrowsers[i].chr,
+				position[i][0],
+				position[i][1]
+			);
+			dallianceBrowserPositions[i] = [position[i][0], position[i][1]];
+			changingLocation = false;
+		};
+		historyBrowser.push(fistoryBrowser.pop())
+		window.history.forward();
+	};
+};
+
+
 function backToOverview(){
 	for (var i = 0;i  < dallianceBrowsers.length;i++){
 		changingLocation = true;
@@ -41,7 +137,7 @@ function backToOverview(){
  		);
  		dallianceBrowserPositions[i] = [(dallianceBrowsers[i].viewStart | 0), (dallianceBrowsers[i].viewEnd | 0)];
  		changingLocation = false;
-	};
+	}
 };
 
 
@@ -58,7 +154,7 @@ function comparativeOnClick(m, poly,comp){
 	var botBrowserCenter = ((parseInt(botBrowser.viewEnd) + (botBrowser.viewStart)) /2);  
 	var topBrowserDifference = topKonvaRangeCenter-topBrowserCenter;
 	var botBrowserDifference = botKonvaRangeCenter-botBrowserCenter;
-	if (lastKonvaClick == m){
+	if(document.getElementById("toggleAutoCenter").checked){
 		topBrowser.setLocation(
 			topBrowser.chr,
 			(topBrowser.viewStart | 0) + topBrowserDifference,
@@ -71,11 +167,11 @@ function comparativeOnClick(m, poly,comp){
 		);
 		dallianceBrowserPositions[comp.id.split("_")[1]-1] = [(topBrowser.viewStart | 0), (topBrowser.viewEnd | 0)];
 		dallianceBrowserPositions[comp.id.split("_")[2]-1] = [(botBrowser.viewStart | 0), (botBrowser.viewEnd | 0)];
-	} else{
+	} else {
 		if (m.rstart > (topBrowser.viewEnd | 0) 
-		&& m.rend >(topBrowser.viewEnd | 0) 
-		|| m.rstart < (topBrowser.viewStart | 0)
-		&& m.rend < (topBrowser.viewStart | 0)){
+			&& m.rend >(topBrowser.viewEnd | 0) 
+			|| m.rstart < (topBrowser.viewStart | 0)
+			&& m.rend < (topBrowser.viewStart | 0)){
 			topBrowser.setLocation(
 				topBrowser.chr,
 				(topBrowser.viewStart | 0) + offset,
@@ -83,35 +179,48 @@ function comparativeOnClick(m, poly,comp){
 			);		
 		} else{		
 			botBrowser.setLocation(
-			botBrowser.chr,
+				botBrowser.chr,
 				(botBrowser.viewStart | 0) - offset,
 				(botBrowser.viewEnd | 0) - offset
-				);		
+			);		
 		};	
 		dallianceBrowserPositions[comp.id.split("_")[1]-1] = [(topBrowser.viewStart | 0), (topBrowser.viewEnd | 0)];
 		dallianceBrowserPositions[comp.id.split("_")[2]-1] = [(botBrowser.viewStart | 0), (botBrowser.viewEnd | 0)];
-		lastKonvaClick = m
-	};	
+	};
 	changingLocation = false;
 };
 
 
-function download(filename,text) {
-	var element = document.createElement('a');
-	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-	element.setAttribute('download', filename);
-	element.style.display = 'none';
-	document.body.appendChild(element);
-	element.click();
-	document.body.removeChild(element);
-};
+function makeGradientColor(color1, color2, percent) {
+    var newColor = {};
+    function makeChannel(a, b) {
+        return(a + Math.round((b-a)*(percent/100)));
+    };
+    function makeColorPiece(num) {
+        num = Math.min(num, 255);   // not more than 255
+        num = Math.max(num, 0);     // not less than 0
+        var str = num.toString(16);
+        if (str.length < 2) {
+            str = "0" + str;
+        }
+        return(str);
+    };
+    newColor.r = makeChannel(color1.r, color2.r);
+    newColor.g = makeChannel(color1.g, color2.g);
+    newColor.b = makeChannel(color1.b, color2.b);
+    newColor.cssColor = "#" + 
+                        makeColorPiece(newColor.r) + 
+                        makeColorPiece(newColor.g) + 
+                        makeColorPiece(newColor.b);
+    return(newColor.cssColor);
+}
 
 
 function drawComparative(cache,comp,top, bottom){
 	stage = new Konva.Stage({
 		container: comp.id,
-		// The -33 is there so the konva layer doesnt exceed the dalliance browser limit.
-		width: window.innerWidth,
+		// The -66 is there so the konva layer doesnt exceed the dalliance browser limit.
+		width: window.innerWidth-66,
 		height: konvaLayerHeight,
 	});
 	var layer = new Konva.Layer();
@@ -142,23 +251,36 @@ function drawComparative(cache,comp,top, bottom){
 		qx2 = layerWidth * ((m.qend - bottom.viewStart) / bottomWidth);
 		y1 = 0;
 		y2 = layerHeight;
-		var colour;
-		var strokeValue = '#990000';
-		var strokeWidthValue = 1;
-		var colourgradient = 100-((100-m.id)*5)
+		var colour
 		if ((m.rend - m.rstart) * (m.qend - m.qstart) > 0) {
-			// Use colour gradient 0-100 based on % identity.
-			colour = makeGradientColor({r:255, g:255, b:255}, {r:255, g:0, b:0}, colourgradient);
+			colour = 'red'
 		} else {
 			colour = 'blue'
-		};
+		}
+		// Use colour gradient 0-100 based on % identity.
+		var colourgradient = 100-((100-m.id)*5)
+
+		colour = makeGradientColor({r:255, g:255, b:255}, {r:255, g:0, b:0}, colourgradient);
+
+
 		var points = [rx1, y1, qx1, y2, qx2, y2, rx2, y1];
+		//		  while (points[0]<0 ||points[0]>layerWidth) {
+		//		      var point=points.splice(0,2);
+		//		      points.push(point);
+		//		  }
 		var poly = new Konva.Line({
 			points: points,
-			stroke: strokeValue,
+			stroke: '#990000',
 			fill: colour,
-			strokeWidth: strokeWidthValue,
+			strokeWidth: 1,
 			closed: true,
+			// draggable: true,
+			// dragBoundFunc: function(pos) {
+   //          	return {
+   //              x: pos.x,
+   //              y: this.getAbsolutePosition().y
+   //          	}
+   //      	}
 		});
 		poly.on('click', function() {
 			comparativeOnClick(m, poly,comp);
@@ -183,17 +305,18 @@ function drawComparative(cache,comp,top, bottom){
 
 		layer.add(poly);
 	});
-	//Draw a white square at the right side of the konva layer for aestethics
-	var points = [layerWidth-45, 1, layerWidth-45, layerHeight, layerWidth, layerHeight, layerWidth, 1];
-	var poly = new Konva.Line({
-			points: points,
-			stroke: "white",
-			fill: "white",
-			strokeWidth: 5,
-			closed: true,
-		});
-	layer.add(poly);
 	stage.add(layer);
+};
+
+
+function download(filename,text) {
+	var element = document.createElement('a');
+	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	element.setAttribute('download', filename);
+	element.style.display = 'none';
+	document.body.appendChild(element);
+	element.click();
+	document.body.removeChild(element);
 };
 
 
@@ -357,83 +480,6 @@ function getGCPercentage(sequence){
 };
 
 
-function getURLParameters(){
-	var urlParams = [];
-	var query  = window.location.search.substring(1);
-	var urlINFO = query.split("&")
-	for (var i = 1;i  < urlINFO.length;i++){ 
-		urlParams.push(parseInt(urlINFO[i].split("=")[1]));
-	};
-	return (urlParams);
-};
-
-
-function historySave(){
-	fistoryBrowser = [];
-	var urlBuild = "?";
-	for (var i = 0;i  < dallianceBrowsers.length;i++){
-		urlBuild += ("&b"+[i+1]+"s="+(dallianceBrowsers[i].viewStart | 0))
-		urlBuild += ("&b"+[i+1]+"e="+(dallianceBrowsers[i].viewEnd | 0))
-	};
-	window.history.pushState('page', 'jjct', urlBuild);
-	var temp = [];
-	for (var i = 0;i  < dallianceBrowserPositions.length;i++){
-		temp.push(dallianceBrowserPositions[i]);
-	};
-	historyBrowser.push(temp);
-};
-
-
-function historyBack(){	
-	if (historyBrowser.length === 0){
-		alert("No more history in this session.");
-	} else {
-		var url = getURLParameters();		
-		var temp = []
-		for (var i = 0;i  < dallianceBrowserPositions.length;i++){
-			temp.push(dallianceBrowserPositions[i][0])
-			temp.push(dallianceBrowserPositions[i][1])
-		}
-		if (arraysEqual(temp,url)){
-			window.history.back();		
-			fistoryBrowser.push(historyBrowser.pop())
-		};
-		var position = historyBrowser[historyBrowser.length - 1];
-		for (var i = 0;i  < dallianceBrowsers.length;i++){
-			changingLocation = true;
-			dallianceBrowsers[i].setLocation(
-				dallianceBrowsers[i].chr,
-				position[i][0],
-				position[i][1]
-			);
-			dallianceBrowserPositions[i] = [position[i][0], position[i][1]];
-			changingLocation = false;
-		};
-	};
-};
-
-
-function historyForward(){
-	if (fistoryBrowser.length === 0){
-		alert("No forward history available.");
-	} else {
-		position = fistoryBrowser[fistoryBrowser.length - 1];
-		for (var i = 0;i  < dallianceBrowsers.length;i++){
-			changingLocation = true;
-			dallianceBrowsers[i].setLocation(
-				dallianceBrowsers[i].chr,
-				position[i][0],
-				position[i][1]
-			);
-			dallianceBrowserPositions[i] = [position[i][0], position[i][1]];
-			changingLocation = false;
-		};
-		historyBrowser.push(fistoryBrowser.pop())
-		window.history.forward();
-	};
-};
-
-
 function loadJSON(path, success, error){
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function()
@@ -453,54 +499,6 @@ function loadJSON(path, success, error){
 };
 
 
-function loadPageFromURL(){
-	urlParams = getURLParameters();
-	var j = 0;
-	if (urlParams.length != 0){
-		for (var i = 0;i  < dallianceBrowsers.length;i++){
-			changingLocation = true;
-			dallianceBrowsers[i].viewStart = parseInt(urlParams[j])
-			dallianceBrowsers[i].viewEnd = parseInt(urlParams[j+1])
-	 		dallianceBrowserPositions[i] = [parseInt(urlParams[j]),parseInt(urlParams[j+1])];
-	 		j+=2
-	 		changingLocation = false;
-		};
-	};
-};
-
-
-function makeCSVG(){
-	blobURL = URL.createObjectURL(dallianceBrowsers[0].makeSVG({highlights: true,
-		ruler: true ? dallianceBrowsers[0].rulerLocation : 'none'}));
-	console.log(blobURL)
-};
-
-
-function makeGradientColor(color1, color2, percent) {
-    var newColor = {};
-    function makeChannel(a, b) {
-        return(a + Math.round((b-a)*(percent/100)));
-    };
-    function makeColorPiece(num) {
-        num = Math.min(num, 255);   // not more than 255
-        num = Math.max(num, 0);     // not less than 0
-        var str = num.toString(16);
-        if (str.length < 2) {
-            str = "0" + str;
-        }
-        return(str);
-    };
-    newColor.r = makeChannel(color1.r, color2.r);
-    newColor.g = makeChannel(color1.g, color2.g);
-    newColor.b = makeChannel(color1.b, color2.b);
-    newColor.cssColor = "#" + 
-                        makeColorPiece(newColor.r) + 
-                        makeColorPiece(newColor.g) + 
-                        makeColorPiece(newColor.b);
-    return(newColor.cssColor);
-};
-
-
 function mouseClick(event, feature, hit, tier,browser) {
 	browser.getSequenceSource().fetch(feature.segment,feature.min,feature.max,null,function(a,b){
 		drawHoverDiv(b,event, feature, hit, tier);
@@ -516,6 +514,13 @@ function mouseOut(event, tier) {
 
 
 function mouseOver(event,feature,hit,tier) {
+	// var tierNum=tier.id.match(/\d+/)[0];
+	// console.log(tier.id);
+	// var types = tier.browser.sources;
+	// console.log(types);
+
+
+	//thisB.featurePopup(event,feature,hit,tier)
 	UnTip()
 	Tip("<b>"+feature.name2 + "</b>"+ '<br>' +
 			(((feature.max)-(feature.min))+1) + ' bp<br>' +
@@ -534,49 +539,20 @@ function refreshBrowser(){
 };
 
 
-function setDesiredChangeRange(){
-	var old = document.getElementById('setDesiredChangeRange').value;
-	if (isNaN(document.getElementById('setDesiredChangeRange').value)) {
-		alert("'"+(document.getElementById('setDesiredChangeRange').value)+"' is not a number.");
-	} else {
-		var i = document.getElementById('setDesiredChangeRange').value
-		if (i >= 100000 && i < 1000000){
-			if (confirm('This will make the browser very slow, are you sure you want this ?')) {
-				desiredChangeRange = i;
-			} else {
-				desiredChangeRange = old;
-			};
-		} else{		
-			desiredChangeRange = i;	
-		};	
-	};
-	refreshBrowser()
-};
-
-
 function refreshComparative(comp, top, bottom) {
-	var viewRegion = (top.viewEnd | 0) - (top.viewStart | 0);
-	if (viewRegion > desiredChangeRange){
-		var comparisonDepth = 0;
-	} else if (viewRegion <= desiredChangeRange) {
-		var comparisonDepth = 1;
-	};
 	var i = comparisons.indexOf(comp.id)
-	if (jsonfiles[i][comparisonDepth] == undefined){
-		var comparisonDepth = 0;
-	};
-	if(cache[i][comparisonDepth] === undefined){
-		loadJSON(jsonfiles[i][comparisonDepth],
+	if(cache[i] === undefined){
+		loadJSON(jsonfiles[i],
 		function(data) {
-			cache[i][comparisonDepth] = data;
-			drawComparative(cache[i][comparisonDepth], comp, top, bottom);
+			cache[i] = data;
+			drawComparative(cache[i], comp, top, bottom);
 		},
 		function(xhr) {
 			console.error(xhr);
 		}
 		);
 	}else{
-		drawComparative(cache[i][comparisonDepth], comp, top, bottom);
+		drawComparative(cache[i], comp, top, bottom);
 	}
 };
 
@@ -630,7 +606,7 @@ function zoomAlignment(browser,browserPositionIndex) {
 					dallianceBrowserPositions[i][0] + startDifference,
 					dallianceBrowserPositions[i][1] + endDifference
 				);
-				dallianceBrowserPositions[i] = [dallianceBrowserPositions[i][0] + startDifference,dallianceBrowserPositions[i][1] + endDifference];				
+				dallianceBrowserPositions[i] = [dallianceBrowserPositions[i][0] + startDifference,dallianceBrowserPositions[i][1] + endDifference];toggleAutoCenter				
 			} else{
 				//Nothing.
 			};
@@ -846,4 +822,4 @@ function translate(dna){
 		}
 	}
 	return(aasequence);
-};
+}
