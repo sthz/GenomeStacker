@@ -1,17 +1,20 @@
-// 
-// Comparative genome browser
+// Name:       browser.js
+// Version:    0.2 (Development)
+// First commmit: 	5 march 2016
+// Last commit:  	23 june -2016
+// Desc: 	THis browser works with dalliance-all.js and wz_tooltip.js Comparative genome browser
 // Jurriaan Jansen 2016-
 // 
 // This program needs the 'jquery-2.1.3.min.js' in order to work. 
  
 // #### variables 
 
-
 var changingLocation = false;
 var konvaLayerHeight = 120;
 var desiredChangeRange = 10000;
 var historyBrowser =  new Array();
 var fistoryBrowser =  new Array();
+var lastKonvaClick;
 
 
 // #### Functions
@@ -55,7 +58,7 @@ function comparativeOnClick(m, poly,comp){
 	var botBrowserCenter = ((parseInt(botBrowser.viewEnd) + (botBrowser.viewStart)) /2);  
 	var topBrowserDifference = topKonvaRangeCenter-topBrowserCenter;
 	var botBrowserDifference = botKonvaRangeCenter-botBrowserCenter;
-	if(document.getElementById("toggleAutoCenter").checked){
+	if (lastKonvaClick == m){
 		topBrowser.setLocation(
 			topBrowser.chr,
 			(topBrowser.viewStart | 0) + topBrowserDifference,
@@ -68,11 +71,11 @@ function comparativeOnClick(m, poly,comp){
 		);
 		dallianceBrowserPositions[comp.id.split("_")[1]-1] = [(topBrowser.viewStart | 0), (topBrowser.viewEnd | 0)];
 		dallianceBrowserPositions[comp.id.split("_")[2]-1] = [(botBrowser.viewStart | 0), (botBrowser.viewEnd | 0)];
-	} else {
+	} else{
 		if (m.rstart > (topBrowser.viewEnd | 0) 
-			&& m.rend >(topBrowser.viewEnd | 0) 
-			|| m.rstart < (topBrowser.viewStart | 0)
-			&& m.rend < (topBrowser.viewStart | 0)){
+		&& m.rend >(topBrowser.viewEnd | 0) 
+		|| m.rstart < (topBrowser.viewStart | 0)
+		&& m.rend < (topBrowser.viewStart | 0)){
 			topBrowser.setLocation(
 				topBrowser.chr,
 				(topBrowser.viewStart | 0) + offset,
@@ -80,14 +83,15 @@ function comparativeOnClick(m, poly,comp){
 			);		
 		} else{		
 			botBrowser.setLocation(
-				botBrowser.chr,
+			botBrowser.chr,
 				(botBrowser.viewStart | 0) - offset,
 				(botBrowser.viewEnd | 0) - offset
-			);		
+				);		
 		};	
 		dallianceBrowserPositions[comp.id.split("_")[1]-1] = [(topBrowser.viewStart | 0), (topBrowser.viewEnd | 0)];
 		dallianceBrowserPositions[comp.id.split("_")[2]-1] = [(botBrowser.viewStart | 0), (botBrowser.viewEnd | 0)];
-	};
+		lastKonvaClick = m
+	};	
 	changingLocation = false;
 };
 
@@ -138,36 +142,23 @@ function drawComparative(cache,comp,top, bottom){
 		qx2 = layerWidth * ((m.qend - bottom.viewStart) / bottomWidth);
 		y1 = 0;
 		y2 = layerHeight;
-		var colour
+		var colour;
+		var strokeValue = '#990000';
+		var strokeWidthValue = 1;
+		var colourgradient = 100-((100-m.id)*5)
 		if ((m.rend - m.rstart) * (m.qend - m.qstart) > 0) {
-			colour = 'red'
+			// Use colour gradient 0-100 based on % identity.
+			colour = makeGradientColor({r:255, g:255, b:255}, {r:255, g:0, b:0}, colourgradient);
 		} else {
 			colour = 'blue'
-		}
-		// Use colour gradient 0-100 based on % identity.
-		var colourgradient = 100-((100-m.id)*5)
-
-		colour = makeGradientColor({r:255, g:255, b:255}, {r:255, g:0, b:0}, colourgradient);
-
-
+		};
 		var points = [rx1, y1, qx1, y2, qx2, y2, rx2, y1];
-		//		  while (points[0]<0 ||points[0]>layerWidth) {
-		//		      var point=points.splice(0,2);
-		//		      points.push(point);
-		//		  }
 		var poly = new Konva.Line({
 			points: points,
-			stroke: '#990000',
+			stroke: strokeValue,
 			fill: colour,
-			strokeWidth: 1,
+			strokeWidth: strokeWidthValue,
 			closed: true,
-			// draggable: true,
-			// dragBoundFunc: function(pos) {
-   //          	return {
-   //              x: pos.x,
-   //              y: this.getAbsolutePosition().y
-   //          	}
-   //      	}
 		});
 		poly.on('click', function() {
 			comparativeOnClick(m, poly,comp);

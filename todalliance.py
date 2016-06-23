@@ -7,8 +7,7 @@
 #	
 #
 # How to use.
-# example: python todalliance.py ./project ./genome1.gb ./compare1_2.m8 ./genome2.gb ./compare2_3.m8 ./genome3.gb 
-# development example: 	python todalliance.py ./output ./Projectfiles/K12_MG1655.catgbk ./Projectfiles/K12_MG1655_O157H7_Sakai.m8  ./Projectfiles/O157H7_Sakai.catgbk 
+# example: python todalliance.py ./project ./genome1.gb ./compare1_2.m8 ./compare1_2_higher_depth.m8./genome2.gb ./compare2_3.m8 ./genome3.gb 
 
 
 import sys, os
@@ -196,7 +195,7 @@ def htmlGenbank(f,genbankfilecount):
 
 def staticIndexInfo(argument,files):
   if argument == "head":
-    return(""" 
+    return("""
       <!DOCTYPE html>
       <!-- Jquery -->
       <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
@@ -216,7 +215,7 @@ def staticIndexInfo(argument,files):
               <title>JJCT</title>
           </head>
         <body>
-          <div class="col-md-8 centered">
+          <div class="col-md-12 centered">
             <hr>
             <b> Settings </b>
             <hr>
@@ -230,6 +229,8 @@ def staticIndexInfo(argument,files):
             <input type="checkbox" data-toggle="toggle" id="showTooltip" checked>
             <input type="search" id="setKonvaLayerHeight" placeholder="Set layer heigth"></input>
             <button class="btn btn-primary" onclick="setKonvaLayerHeight()">Set</button>
+            <input type="search" id="setDesiredChangeRange" placeholder="Set desired change range"></input>
+            <button class="btn btn-primary" onclick="setDesiredChangeRange()">Set</button>
             <button class="btn btn-primary" onclick="generateFastaFile()">display fasta file from selected sequences.</button>
             <br>
             <hr>
@@ -266,14 +267,7 @@ def staticIndexInfo(argument,files):
 
   
 def validateInputOrder():
-  order = []
-  for i in sys.argv:
-    order.append(i)
-  count = 0
-  for i in order:
-    count +=1
-    if count > 2:
-      split = i.split(".")
+  pass
   
 
 def getStaticFiles(path):
