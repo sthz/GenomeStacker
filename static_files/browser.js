@@ -9,45 +9,12 @@
 
 var changingLocation = false;
 var konvaLayerHeight = 120;
+var desiredChangeRange = 10000;
 var historyBrowser =  new Array();
 var fistoryBrowser =  new Array();
 
 
 // #### Functions
-
-
-function makeCSVG(){
-	blobURL = URL.createObjectURL(dallianceBrowsers[0].makeSVG({highlights: true,
-		ruler: true ? dallianceBrowsers[0].rulerLocation : 'none'}));
-	console.log(blobURL)
-};
-
-function getURLParameters(){
-	var urlParams = [];
-	var query  = window.location.search.substring(1);
-	var urlINFO = query.split("&")
-	for (var i = 1;i  < urlINFO.length;i++){ 
-		urlParams.push(parseInt(urlINFO[i].split("=")[1]));
-	};
-	return (urlParams);
-};
-
-
-function loadPageFromURL(){
-	urlParams = getURLParameters();
-	var j = 0;
-	console.log(urlParams);
-	if (urlParams.length != 0){
-		for (var i = 0;i  < dallianceBrowsers.length;i++){
-			changingLocation = true;
-			dallianceBrowsers[i].viewStart = parseInt(urlParams[j])
-			dallianceBrowsers[i].viewEnd = parseInt(urlParams[j+1])
-	 		dallianceBrowserPositions[i] = [parseInt(urlParams[j]),parseInt(urlParams[j+1])];
-	 		j+=2
-	 		changingLocation = false;
-		};
-	};
-};
 
 
 function arraysEqual(arr1, arr2) {
@@ -58,72 +25,6 @@ function arraysEqual(arr1, arr2) {
             return false;
     };
     return true;
-};
-
-
-function historySave(){
-	fistoryBrowser = [];
-	var urlBuild = "?";
-	for (var i = 0;i  < dallianceBrowsers.length;i++){
-		urlBuild += ("&b"+[i+1]+"s="+(dallianceBrowsers[i].viewStart | 0))
-		urlBuild += ("&b"+[i+1]+"e="+(dallianceBrowsers[i].viewEnd | 0))
-	};
-	window.history.pushState('page', 'jjct', urlBuild);
-	var temp = [];
-	for (var i = 0;i  < dallianceBrowserPositions.length;i++){
-		temp.push(dallianceBrowserPositions[i]);
-	};
-	historyBrowser.push(temp);
-};
-
-
-function historyBack(){	
-	if (historyBrowser.length === 0){
-		alert("No more history in this session.");
-	} else {
-		var url = getURLParameters();		
-		var temp = []
-		for (var i = 0;i  < dallianceBrowserPositions.length;i++){
-			temp.push(dallianceBrowserPositions[i][0])
-			temp.push(dallianceBrowserPositions[i][1])
-		}
-		if (arraysEqual(temp,url)){
-			window.history.back();		
-			fistoryBrowser.push(historyBrowser.pop())
-		};
-		var position = historyBrowser[historyBrowser.length - 1];
-		for (var i = 0;i  < dallianceBrowsers.length;i++){
-			changingLocation = true;
-			dallianceBrowsers[i].setLocation(
-				dallianceBrowsers[i].chr,
-				position[i][0],
-				position[i][1]
-			);
-			dallianceBrowserPositions[i] = [position[i][0], position[i][1]];
-			changingLocation = false;
-		};
-	};
-};
-
-
-function historyForward(){
-	if (fistoryBrowser.length === 0){
-		alert("No forward history available.");
-	} else {
-		position = fistoryBrowser[fistoryBrowser.length - 1];
-		for (var i = 0;i  < dallianceBrowsers.length;i++){
-			changingLocation = true;
-			dallianceBrowsers[i].setLocation(
-				dallianceBrowsers[i].chr,
-				position[i][0],
-				position[i][1]
-			);
-			dallianceBrowserPositions[i] = [position[i][0], position[i][1]];
-			changingLocation = false;
-		};
-		historyBrowser.push(fistoryBrowser.pop())
-		window.history.forward();
-	};
 };
 
 
@@ -189,31 +90,6 @@ function comparativeOnClick(m, poly,comp){
 	};
 	changingLocation = false;
 };
-
-
-function makeGradientColor(color1, color2, percent) {
-    var newColor = {};
-    function makeChannel(a, b) {
-        return(a + Math.round((b-a)*(percent/100)));
-    };
-    function makeColorPiece(num) {
-        num = Math.min(num, 255);   // not more than 255
-        num = Math.max(num, 0);     // not less than 0
-        var str = num.toString(16);
-        if (str.length < 2) {
-            str = "0" + str;
-        }
-        return(str);
-    };
-    newColor.r = makeChannel(color1.r, color2.r);
-    newColor.g = makeChannel(color1.g, color2.g);
-    newColor.b = makeChannel(color1.b, color2.b);
-    newColor.cssColor = "#" + 
-                        makeColorPiece(newColor.r) + 
-                        makeColorPiece(newColor.g) + 
-                        makeColorPiece(newColor.b);
-    return(newColor.cssColor);
-}
 
 
 function drawComparative(cache,comp,top, bottom){
@@ -480,6 +356,83 @@ function getGCPercentage(sequence){
 };
 
 
+function getURLParameters(){
+	var urlParams = [];
+	var query  = window.location.search.substring(1);
+	var urlINFO = query.split("&")
+	for (var i = 1;i  < urlINFO.length;i++){ 
+		urlParams.push(parseInt(urlINFO[i].split("=")[1]));
+	};
+	return (urlParams);
+};
+
+
+function historySave(){
+	fistoryBrowser = [];
+	var urlBuild = "?";
+	for (var i = 0;i  < dallianceBrowsers.length;i++){
+		urlBuild += ("&b"+[i+1]+"s="+(dallianceBrowsers[i].viewStart | 0))
+		urlBuild += ("&b"+[i+1]+"e="+(dallianceBrowsers[i].viewEnd | 0))
+	};
+	window.history.pushState('page', 'jjct', urlBuild);
+	var temp = [];
+	for (var i = 0;i  < dallianceBrowserPositions.length;i++){
+		temp.push(dallianceBrowserPositions[i]);
+	};
+	historyBrowser.push(temp);
+};
+
+
+function historyBack(){	
+	if (historyBrowser.length === 0){
+		alert("No more history in this session.");
+	} else {
+		var url = getURLParameters();		
+		var temp = []
+		for (var i = 0;i  < dallianceBrowserPositions.length;i++){
+			temp.push(dallianceBrowserPositions[i][0])
+			temp.push(dallianceBrowserPositions[i][1])
+		}
+		if (arraysEqual(temp,url)){
+			window.history.back();		
+			fistoryBrowser.push(historyBrowser.pop())
+		};
+		var position = historyBrowser[historyBrowser.length - 1];
+		for (var i = 0;i  < dallianceBrowsers.length;i++){
+			changingLocation = true;
+			dallianceBrowsers[i].setLocation(
+				dallianceBrowsers[i].chr,
+				position[i][0],
+				position[i][1]
+			);
+			dallianceBrowserPositions[i] = [position[i][0], position[i][1]];
+			changingLocation = false;
+		};
+	};
+};
+
+
+function historyForward(){
+	if (fistoryBrowser.length === 0){
+		alert("No forward history available.");
+	} else {
+		position = fistoryBrowser[fistoryBrowser.length - 1];
+		for (var i = 0;i  < dallianceBrowsers.length;i++){
+			changingLocation = true;
+			dallianceBrowsers[i].setLocation(
+				dallianceBrowsers[i].chr,
+				position[i][0],
+				position[i][1]
+			);
+			dallianceBrowserPositions[i] = [position[i][0], position[i][1]];
+			changingLocation = false;
+		};
+		historyBrowser.push(fistoryBrowser.pop())
+		window.history.forward();
+	};
+};
+
+
 function loadJSON(path, success, error){
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function()
@@ -499,6 +452,55 @@ function loadJSON(path, success, error){
 };
 
 
+function loadPageFromURL(){
+	urlParams = getURLParameters();
+	var j = 0;
+	console.log(urlParams);
+	if (urlParams.length != 0){
+		for (var i = 0;i  < dallianceBrowsers.length;i++){
+			changingLocation = true;
+			dallianceBrowsers[i].viewStart = parseInt(urlParams[j])
+			dallianceBrowsers[i].viewEnd = parseInt(urlParams[j+1])
+	 		dallianceBrowserPositions[i] = [parseInt(urlParams[j]),parseInt(urlParams[j+1])];
+	 		j+=2
+	 		changingLocation = false;
+		};
+	};
+};
+
+
+function makeCSVG(){
+	blobURL = URL.createObjectURL(dallianceBrowsers[0].makeSVG({highlights: true,
+		ruler: true ? dallianceBrowsers[0].rulerLocation : 'none'}));
+	console.log(blobURL)
+};
+
+
+function makeGradientColor(color1, color2, percent) {
+    var newColor = {};
+    function makeChannel(a, b) {
+        return(a + Math.round((b-a)*(percent/100)));
+    };
+    function makeColorPiece(num) {
+        num = Math.min(num, 255);   // not more than 255
+        num = Math.max(num, 0);     // not less than 0
+        var str = num.toString(16);
+        if (str.length < 2) {
+            str = "0" + str;
+        }
+        return(str);
+    };
+    newColor.r = makeChannel(color1.r, color2.r);
+    newColor.g = makeChannel(color1.g, color2.g);
+    newColor.b = makeChannel(color1.b, color2.b);
+    newColor.cssColor = "#" + 
+                        makeColorPiece(newColor.r) + 
+                        makeColorPiece(newColor.g) + 
+                        makeColorPiece(newColor.b);
+    return(newColor.cssColor);
+};
+
+
 function mouseClick(event, feature, hit, tier,browser) {
 	browser.getSequenceSource().fetch(feature.segment,feature.min,feature.max,null,function(a,b){
 		drawHoverDiv(b,event, feature, hit, tier);
@@ -514,13 +516,6 @@ function mouseOut(event, tier) {
 
 
 function mouseOver(event,feature,hit,tier) {
-	// var tierNum=tier.id.match(/\d+/)[0];
-	// console.log(tier.id);
-	// var types = tier.browser.sources;
-	// console.log(types);
-
-
-	//thisB.featurePopup(event,feature,hit,tier)
 	UnTip()
 	Tip("<b>"+feature.name2 + "</b>"+ '<br>' +
 			(((feature.max)-(feature.min))+1) + ' bp<br>' +
@@ -539,20 +534,39 @@ function refreshBrowser(){
 };
 
 
+function setDesiredChangeRange(){
+	if (isNaN(document.getElementById('setDesiredChangeRange').value)) {
+		alert("'"+(document.getElementById('setDesiredChangeRange').value)+"' is not a number.");
+	} else {
+		desiredChangeRange = document.getElementById('setDesiredChangeRange').value;
+		refreshBrowser()
+	};
+}
+
+
 function refreshComparative(comp, top, bottom) {
+	var viewRegion = (top.viewEnd | 0) - (top.viewStart | 0);
+	if (viewRegion > desiredChangeRange){
+		var comparisonDepth = 0;
+	} else if (viewRegion <= desiredChangeRange) {
+		var comparisonDepth = 1;
+	};
 	var i = comparisons.indexOf(comp.id)
-	if(cache[i] === undefined){
-		loadJSON(jsonfiles[i],
+	if (jsonfiles[i][comparisonDepth] == undefined){
+		var comparisonDepth = 0;
+	};
+	if(cache[i][comparisonDepth] === undefined){
+		loadJSON(jsonfiles[i][comparisonDepth],
 		function(data) {
-			cache[i] = data;
-			drawComparative(cache[i], comp, top, bottom);
+			cache[i][comparisonDepth] = data;
+			drawComparative(cache[i][comparisonDepth], comp, top, bottom);
 		},
 		function(xhr) {
 			console.error(xhr);
 		}
 		);
 	}else{
-		drawComparative(cache[i], comp, top, bottom);
+		drawComparative(cache[i][comparisonDepth], comp, top, bottom);
 	}
 };
 
@@ -822,4 +836,4 @@ function translate(dna){
 		}
 	}
 	return(aasequence);
-}
+};
