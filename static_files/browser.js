@@ -15,6 +15,7 @@ var desiredChangeRange = 10000;
 var historyBrowser =  new Array();
 var fistoryBrowser =  new Array();
 var lastKonvaClick;
+var selectedKonva;
 
 
 // #### Functions
@@ -59,6 +60,7 @@ function comparativeOnClick(m, poly,comp){
 	var topBrowserDifference = topKonvaRangeCenter-topBrowserCenter;
 	var botBrowserDifference = botKonvaRangeCenter-botBrowserCenter;
 	if (lastKonvaClick == m){
+
 		topBrowser.setLocation(
 			topBrowser.chr,
 			(topBrowser.viewStart | 0) + topBrowserDifference,
@@ -75,7 +77,8 @@ function comparativeOnClick(m, poly,comp){
 		if (m.rstart > (topBrowser.viewEnd | 0) 
 		&& m.rend >(topBrowser.viewEnd | 0) 
 		|| m.rstart < (topBrowser.viewStart | 0)
-		&& m.rend < (topBrowser.viewStart | 0)){
+		&& m.rend < (topBrowser.viewStart | 0)
+		|| offset >= botBrowser.viewStart){
 			topBrowser.setLocation(
 				topBrowser.chr,
 				(topBrowser.viewStart | 0) + offset,
@@ -90,7 +93,7 @@ function comparativeOnClick(m, poly,comp){
 		};	
 		dallianceBrowserPositions[comp.id.split("_")[1]-1] = [(topBrowser.viewStart | 0), (topBrowser.viewEnd | 0)];
 		dallianceBrowserPositions[comp.id.split("_")[2]-1] = [(botBrowser.viewStart | 0), (botBrowser.viewEnd | 0)];
-		lastKonvaClick = m
+		lastKonvaClick = m		
 	};	
 	changingLocation = false;
 };
@@ -108,6 +111,7 @@ function download(filename,text) {
 
 
 function drawComparative(cache,comp,top, bottom){
+
 	stage = new Konva.Stage({
 		container: comp.id,
 		// The -33 is there so the konva layer doesnt exceed the dalliance browser limit.
@@ -152,6 +156,10 @@ function drawComparative(cache,comp,top, bottom){
 		} else {
 			colour = 'blue'
 		};
+		if (m == selectedKonva){
+			strokeValue = "#5FA9FC";
+			strokeWidthValue = 2;
+		}
 		var points = [rx1, y1, qx1, y2, qx2, y2, rx2, y1];
 		var poly = new Konva.Line({
 			points: points,
@@ -161,6 +169,7 @@ function drawComparative(cache,comp,top, bottom){
 			closed: true,
 		});
 		poly.on('click', function() {
+			selectedKonva = m;
 			comparativeOnClick(m, poly,comp);
 		});
 		poly.on('mouseover', function() {
@@ -470,9 +479,14 @@ function loadPageFromURL(){
 
 
 function makeCSVG(){
-	blobURL = URL.createObjectURL(dallianceBrowsers[0].makeSVG({highlights: true,
-		ruler: true ? dallianceBrowsers[0].rulerLocation : 'none'}));
-	console.log(blobURL)
+	var svgarray = ""
+	for(var i=0;i < dallianceBrowsers.length;i++){
+	// blobURL = URL.createObjectURL(dallianceBrowsers[i].makeSVG({highlights: true,
+	// 	ruler: true ? dallianceBrowsers[i].rulerLocation : 'none'}));
+	console.log(dallianceBrowsers[i].makeSVG({highlights: true,
+		ruler: true ? dallianceBrowsers[i].rulerLocation : 'none'}))
+	}
+	console.log(svgarray)
 };
 
 
