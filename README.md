@@ -6,8 +6,6 @@ a program that creates a comparative web based interactive genome browser. Devel
 analysing and showcasing of multiple whole bacterial genomes. The reason for this project is the make visualisation and research in 
 comparative genomics easier, more accessible and more easily distributed.
 
-Jurriaan Jansen ©
-
 ###In order to work the following has to be installed:
 - <b>python</b>      2.7.3 <br>
 - <b>BioPython</b>   1.66. <br>
