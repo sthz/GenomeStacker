@@ -14,3 +14,8 @@ Jurriaan Jansen ©
 <b>faToTwoBit</b>  http://hgdownload.cse.ucsc.edu/downloads.html<br>
 <b>gb2fasta</b>    https://github.com/RoyChaudhuri/bioperl-scripts/blob/master/gb2fasta<br>
 <b>gb2bigbed</b>   University of Sheffield inhouse script.<br>
+
+###Example command
+'''
+python genomestacker.py ./output genome_1.catgb genome_1_2_default.m8 genome_1_2_param1.m8 genome_2.catgb genome_2_3_default.m8 genome_2_3_param1.m8 genome_3.catgb
+'''
