@@ -5,6 +5,8 @@ With the knowledge of the comparative genome viewer’s Genome Stacker was made 
 a program that creates a comparative web based interactive genome browser. Developed for the purpose of comparing, 
 analysing and showcasing of multiple whole bacterial genomes. The reason for this project is the make visualisation and research in 
 comparative genomics easier, more accessible and more easily distributed.
+###Output of actcompare
+GenomeStacker uses information created by ACTcompare. http://www.sanger.ac.uk/science/tools/artemis-comparison-tool-act
 
 ###In order to work the following has to be installed:
 - <b>python</b>      2.7.3 <br>
