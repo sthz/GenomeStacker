@@ -7,3 +7,10 @@ analysing and showcasing of multiple whole bacterial genomes. The reason for thi
 comparative genomics easier, more accessible and more easily distributed.
 
 Jurriaan Jansen ©
+
+In order to work the following has to be installed:
+python      2.7.3 
+BioPython   1.66. 
+faToTwoBit  http://hgdownload.cse.ucsc.edu/downloads.html
+gb2fasta    https://github.com/RoyChaudhuri/bioperl-scripts/blob/master/gb2fasta
+gb2bigbed   University of Sheffield inhouse script.
